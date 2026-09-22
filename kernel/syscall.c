@@ -169,7 +169,7 @@ syscall(void)
   num = p->trapframe->a7;
   if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {
     if (p->trace_enabled){
-      printf("Syscall Name: %s Process PID: %d\n", syscall_names[name], p->pid);
+      printk("Syscall Name: %s Process PID: %d\n", syscall_names[name], p->pid);
     }
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0
