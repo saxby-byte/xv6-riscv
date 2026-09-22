@@ -103,6 +103,7 @@ extern uint64 sys_link(void);
 extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_sync(void);
+extern uint64 sys_syscalltrace(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -127,10 +128,37 @@ static uint64 (*syscalls[])(void) = {
   [SYS_mknod]   = sys_mknod,
   [SYS_unlink]  = sys_unlink,
   [SYS_link]    = sys_link,
-  [SYS_mkdir]   = sys_mkdir,
-  [SYS_close]   = sys_close,
-  [SYS_sync]    = sys_sync,
+  [SYS_mkdir]        = sys_mkdir,
+  [SYS_close]        = sys_close,
+  [SYS_sync]         = sys_sync,
+  [SYS_syscalltrace] = sys_syscalltrace,
   // clang-format on
+};
+
+static char *syscall_names[] = {
+[SYS_fork]        "fork",
+[SYS_exit]        "exit",
+[SYS_wait]        "wait",
+[SYS_pipe]        "pipe",
+[SYS_read]        "read",
+[SYS_kill]        "kill",
+[SYS_exec]        "exec",
+[SYS_fstat]       "fstat",
+[SYS_chdir]       "chdir",
+[SYS_dup]         "dup",
+[SYS_getpid]      "getpid",
+[SYS_sbrk]        "sbrk",
+[SYS_sleep]       "sleep",
+[SYS_uptime]      "uptime",
+[SYS_open]        "open",
+[SYS_write]       "write",
+[SYS_mknod]       "mknod",
+[SYS_unlink]      "unlink",
+[SYS_link]        "link",
+[SYS_mkdir]       "mkdir",
+[SYS_close]       "close",
+[SYS_sync]        "sync",
+[SYS_syscalltrace]"syscalltrace",
 };
 
 void
@@ -141,6 +169,9 @@ syscall(void)
 
   num = p->trapframe->a7;
   if (num > 0 && num < NELEM(syscalls) && syscalls[num]) {
+    if (p->trace_enabled){
+      printk("Syscall Name: %s Process PID: %d\n", syscall_names[name], p->pid);
+    }
     // Use num to lookup the system call function for num, call it,
     // and store its return value in p->trapframe->a0
     p->trapframe->a0 = syscalls[num]();
