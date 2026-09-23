@@ -19,7 +19,6 @@ int main(int argc, char *argv[]){
   }
   if (pid == 0){
   printf("Child Tracking Value: %d\n", 0);
-  uptime();
   exit(0);
   }else{
   printf("Parent Tracking Value: %d\n", 1);
