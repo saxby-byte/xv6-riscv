@@ -149,6 +149,7 @@ static char *syscall_names[] = {
 [SYS_dup]         "dup",
 [SYS_getpid]      "getpid",
 [SYS_sbrk]        "sbrk",
+[SYS_pause]       "pause",
 [SYS_uptime]      "uptime",
 [SYS_open]        "open",
 [SYS_write]       "write",
