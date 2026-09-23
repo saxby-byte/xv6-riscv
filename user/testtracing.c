@@ -23,7 +23,7 @@ int main(void){
   exit(0);
   }else{
     wait(0);
-    syscalltracing(0);
+    syscalltrace(0);
   printf("Parent Tracking Value: %d\n", 1);
   }
   exit(0);
