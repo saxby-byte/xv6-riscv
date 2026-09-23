@@ -2,14 +2,14 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
-int main(int argc, char *argv[]){
+int main(void){
   int ticks = uptime();
   printf("Process Uptime: %d\n", ticks);
   printf("Testing syscalltrace() implementation...\n");
   syscalltrace(1);
   sbrk(0);
   getpid();
-  sleep(1);
+  uptime();
   
   int pid = fork();
 
@@ -19,10 +19,12 @@ int main(int argc, char *argv[]){
   }
   if (pid == 0){
   printf("Child Tracking Value: %d\n", 0);
+    getpid();
   exit(0);
   }else{
-  printf("Parent Tracking Value: %d\n", 1);
     wait(0);
+    syscalltracing(0);
+  printf("Parent Tracking Value: %d\n", 1);
   }
   exit(0);
 }
