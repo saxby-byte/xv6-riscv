@@ -17,10 +17,6 @@ int main(void){
   printf("Fork failed\n");
   exit(1);
   }
-  if (pid == 0){
-  printf("Child Tracking Value: %d\n", 0);
-    getpid();
-  exit(0);
   }else{
     wait(0);
     syscalltrace(0);
