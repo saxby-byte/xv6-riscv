@@ -9,7 +9,7 @@ int main(void){
   syscalltrace(1);
   sbrk(0);
   getpid();
-  uptime();
+  
   
   int pid = fork();
 
@@ -17,8 +17,8 @@ int main(void){
   printf("Fork failed\n");
   exit(1);
   }else{
-    wait(0);
-    syscalltrace(0);
+    uptime(0);
+    exit(0);
   printf("Parent Tracking Value: %d\n", 1);
   }
   exit(0);
