@@ -17,7 +17,7 @@ int main(void){
   printf("Fork failed\n");
   exit(1);
   }else{
-    uptime(0);
+    uptime();
     exit(0);
   printf("Parent Tracking Value: %d\n", 1);
   }
