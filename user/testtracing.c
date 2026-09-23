@@ -2,9 +2,9 @@
 #include "kernel/stat.h"
 #include "user/user.h"
 
-int main(void){
+int main(int argc, char *argv[]){
   int ticks = uptime();
-  printk("Uptime before trace: %d\n", ticks);
+  printf("Uptime before trace: %d\n", ticks);
   printk("Enabling tracing...\n");
   syscalltrace(1);
 
