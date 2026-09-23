@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]){
   int ticks = uptime();
-  printf("Uptime before trace: %d\n", ticks);
+  printf("Process Uptime: %d\n", ticks);
   printf("Enabling tracing...\n");
   syscalltrace(1);
 
