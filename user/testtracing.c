@@ -10,7 +10,6 @@ int main(int argc, char *argv[]){
 
   getpid();
   uptime();
-  sleep(1);
 
   int pid = fork();
 
