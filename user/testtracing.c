@@ -9,7 +9,6 @@ int main(int argc, char *argv[]){
   syscalltrace(1);
   sbrk(0);
   getpid();
-  uptime();
   sleep(1);
   
   int pid = fork();
