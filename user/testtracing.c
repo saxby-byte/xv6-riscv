@@ -16,7 +16,6 @@ int main(void){
   if (pid < 0){
   printf("Fork failed\n");
   exit(1);
-  }
   }else{
     wait(0);
     syscalltrace(0);
