@@ -6,7 +6,7 @@ int main(void){
   int ticks = uptime();
   printf("Process Uptime: %d\n", ticks);
   printf("Testing syscalltrace() implementation...\n");
-  syscalltrace();
+  syscalltrace(1);
   sbrk(0);
   getpid();
   pause(1);
