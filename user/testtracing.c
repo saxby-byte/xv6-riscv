@@ -4,7 +4,7 @@
 
 int main(int argc, char *argv[]){
   int ticks = uptime();
-  printf("Process Uptime: %d\n", uptime());
+  printf("Process Uptime: %d\n", ticks);
   printf("Testing syscalltrace() implementation...\n");
   syscalltrace(1);
   sbrk(0);
