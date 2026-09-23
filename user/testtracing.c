@@ -9,7 +9,7 @@ int main(void){
   syscalltrace(1);
   sbrk(0);
   getpid();
-  pause(0);
+  pause(1);
   
   int pid = fork();
 
