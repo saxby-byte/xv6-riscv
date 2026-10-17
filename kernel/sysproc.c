@@ -124,3 +124,11 @@ return -1;
 mode = m;
 return 0;
 }
+
+uint64
+sys_priority_fork(void)
+{
+  int priority;
+  argint(0, &priority);
+  return priority_fork(priority);
+}
