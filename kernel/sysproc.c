@@ -110,3 +110,17 @@ sys_uptime(void)
   release(&tickslock);
   return xticks;
 }
+
+uint64
+sys_debug(void)
+{
+  int m;
+// Retrieve the integer argument passed to the system call
+  argint(0, &m);
+// Validate the mode parameter (must be 0 or 1)
+if (m < 0 || m > 1){
+return -1;
+}
+mode = m;
+return 0;
+}
