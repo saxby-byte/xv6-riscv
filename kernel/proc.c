@@ -444,20 +444,46 @@ scheduler(void)
     intr_on();
     intr_off();
 
-    int found = 0;
+    int total_remaining_slots = 0;
+    int total_weight = 0;
+
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if (p->state == RUNNABLE) {
-        // Switch to chosen process.  It is the process's job
-        // to release its lock and then reacquire it
-        // before jumping back to us.
+        total_remaining_slots += p->num_epoch_slots;
+        total_weight += (20 - p->priority);
+      }
+      release(&p->lock);
+    }
+
+    if (total_remaining_slots == 0 && total_weight > 0) {
+      if (mode == 1) {
+        printf("Epoch Start\n");
+      }
+
+      for (p = proc; p < &proc[NPROC]; p++) {
+        acquire(&p->lock);
+        if (p->state == RUNNABLE) {
+          // num_epoch_slots_i = 40 * (20 - p_i) / sum(20 - p_i)
+          p->num_epoch_slots = (40 * (20 - p->priority)) / total_weight;
+        }
+        release(&p->lock);
+      }
+    }
+    
+    int found = 0;
+    for (p = proc; p < &proc[NPROC]; p++) {
+      acquire(&p->lock);
+      if (p->state == RUNNABLE && p->num_epoch_slots > 0) {
+        p->num_epoch_slots--;
+        if (mode == 1){
+          printf("PID: %d, Priority: %d\n", p->pid, p->priority);
+        }
         p->state = RUNNING;
         c->proc = p;
         swtch(&c->context, &p->context);
-
         // Don't re-enable interrupts on release.
         mycpu()->intena = 0;
-
         // Process is done running for now.
         // It should have changed its p->state before coming back.
         c->proc = 0;
@@ -465,6 +491,7 @@ scheduler(void)
       }
       release(&p->lock);
     }
+
     if (found == 0) {
       // nothing to run; stop running on this core until an interrupt.
       asm volatile("wfi");
