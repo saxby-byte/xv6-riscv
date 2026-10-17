@@ -274,7 +274,9 @@ kfork(void)
     return -1;
   }
   np->sz = p->sz;
-
+  //default values
+  np->priority = 10;
+  np->num_epoch_slots = 0;
   // copy saved user registers.
   *(np->trapframe) = *(p->trapframe);
 
