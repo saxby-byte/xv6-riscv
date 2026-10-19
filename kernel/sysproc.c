@@ -121,7 +121,6 @@ sys_debug(void)
 if (m < 0 || m > 1){
 return -1;
 }
-mode = m;
 return 0;
 }
 
