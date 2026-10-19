@@ -732,7 +732,7 @@ procdump(void)
 }
 
 int
-priority_fork(int priority)
+kpriority_fork(int priority)
 {
   int i, pid;
   struct proc *np;
