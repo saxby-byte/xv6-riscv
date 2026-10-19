@@ -129,5 +129,5 @@ sys_priority_fork(void)
 {
   int priority;
   argint(0, &priority);
-  return priority_fork(priority);
+  return kpriority_fork(priority);
 }
