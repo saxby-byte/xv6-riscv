@@ -133,7 +133,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_close]   = sys_close,
   [SYS_sync]    = sys_sync,
   [SYS_debug]   = sys_debug,
-  [SYS_priority_fork] sys_priority_fork,
+  [SYS_priority_fork] = sys_priority_fork,
   // clang-format on
 };
 
