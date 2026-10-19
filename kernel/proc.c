@@ -459,7 +459,7 @@ scheduler(void)
 
     if (total_remaining_slots == 0 && total_weight > 0) {
       if (mode == 1) {
-        printf("%s","Epoch Start\n");
+        printk("Epoch Start\n");
       }
 
       for (p = proc; p < &proc[NPROC]; p++) {
@@ -478,7 +478,7 @@ scheduler(void)
       if (p->state == RUNNABLE && p->num_epoch_slots > 0) {
         p->num_epoch_slots--;
         if (mode == 1){
-          printf("PID: %d, Priority: %d\n", p->pid, p->priority);
+          printk("PID: %d, Priority: %d\n", p->pid, p->priority);
         }
         p->state = RUNNING;
         c->proc = p;
