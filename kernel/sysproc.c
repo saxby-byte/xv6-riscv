@@ -124,6 +124,8 @@ return -1;
 return 0;
 }
 
+int kpriority_fork(int priority);
+
 uint64
 sys_priority_fork(void)
 {
