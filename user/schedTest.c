@@ -48,7 +48,7 @@ int main(int argc, char *argv[]) {
   debug(1);
 
   for (int i = 0; i < 8; i++) {
-    int pid = priority_fork(priorities[i]);
+    int pid = kpriority_fork(priorities[i]);
     if (pid < 0) {
       printf("Error: priority_fork failed\n");
       exit(1);
