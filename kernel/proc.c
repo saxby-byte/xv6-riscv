@@ -459,7 +459,7 @@ scheduler(void)
 
     if (total_remaining_slots == 0 && total_weight > 0) {
       if (mode == 1) {
-        printf("Epoch Start\n");
+        printf("%s","Epoch Start\n");
       }
 
       for (p = proc; p < &proc[NPROC]; p++) {
