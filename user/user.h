@@ -26,7 +26,7 @@ int pause(int);
 int uptime(void);
 int sync(void);
 int debug(int mode);
-int kpriority_fork(int priority);
+int priority_fork(int priority);
 
 // ulib.c
 int stat(const char *, struct stat *);
