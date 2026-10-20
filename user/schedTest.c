@@ -63,12 +63,12 @@ int main(int argc, char *argv[]) {
       int total_armstrong = compute_armstrong(limit);
       int end_tick = uptime();
       int duration = end_tick - start_tick;
-
+      
+if (debug_val == 0) {
         printf("Process %d:\n", current_pid);
         printf("Number of Armstrong Numbers between 2 and %d: %d\n", limit, total_armstrong);
         printf("Time for process to complete:%dticks\n\n", duration);
-    
-
+      }
       exit(0);
     } else {
   printf("Forking a process with PID: %d and Priority: %d\n\n", pid, priorities[i]);
@@ -78,9 +78,6 @@ int main(int argc, char *argv[]) {
   for (int i = 0; i < 8; i++) {
     wait(0);
   }
-
-  // Reset debug mode to run mode
-  debug(0);
 
   exit(0);
 }
