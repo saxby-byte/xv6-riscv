@@ -64,11 +64,10 @@ int main(int argc, char *argv[]) {
       int end_tick = uptime();
       int duration = end_tick - start_tick;
 
-      if (debug_val == 0) {
         printf("Process %d:\n", current_pid);
         printf("Number of Armstrong Numbers between 2 and %d: %d\n", limit, total_armstrong);
         printf("Time for process to complete:%dticks\n\n", duration);
-      }
+    
 
       exit(0);
     } else {
