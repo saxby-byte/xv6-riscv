@@ -15,6 +15,7 @@ struct proc *initproc;
 
 int nextpid = 1;
 int mode = 0;
+int epoch_count = 0;
 struct spinlock pid_lock;
 
 extern void forkret(void);
@@ -458,8 +459,10 @@ scheduler(void)
     }
 
     if (total_remaining_slots == 0 && total_weight > 0) {
+      epoch_count++;
+      
       if (mode == 1) {
-        printk("Epoch Start\n");
+        printk("====================Epoch #%d====================\n", epoch_count);
       }
 
       for (p = proc; p < &proc[NPROC]; p++) {
@@ -476,10 +479,22 @@ scheduler(void)
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
       if (p->state == RUNNABLE && p->num_epoch_slots > 0) {
-        p->num_epoch_slots--;
+        int total_slots = p->num_epoch_slots;
+        int current_slot = 1;
+        
         if (mode == 1){
-          printk("PID: %d, Priority: %d\n", p->pid, p->priority);
+          printk("Process: %s\nPID: %d\nPriority: %d\nNum Slots: %d\n\n", p->name, p->pid, p->priority, total_slots);
         }
+        while (p->state == RUNNABLE && p->num_epoch_slots > 0) {
+          p->num_epoch_slots--;
+
+          if (mode == 1) {
+            
+            printk("Running process %s with PID %d and priority %d for %d/%d slots\n",
+                   p->name, p->pid, p->priority, current_slot, total_slots);
+          }
+        current_slot++;
+          
         p->state = RUNNING;
         c->proc = p;
         swtch(&c->context, &p->context);
@@ -488,11 +503,16 @@ scheduler(void)
         // Process is done running for now.
         // It should have changed its p->state before coming back.
         c->proc = 0;
+        
+      }
+        if (mode == 1) {
+          printk("\n");
+        }
+        
         found = 1;
       }
       release(&p->lock);
     }
-
     if (found == 0) {
       // nothing to run; stop running on this core until an interrupt.
       asm volatile("wfi");
