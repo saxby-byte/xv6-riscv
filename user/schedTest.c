@@ -75,7 +75,6 @@ int main(int argc, char *argv[]) {
   printf("Forking a process with PID: %d and Priority: %d\n\n", pid, priorities[i]);
     }
   }
-sleep(1);
   // Wait for all 8 child processes
   for (int i = 0; i < 8; i++) {
     wait(0);
