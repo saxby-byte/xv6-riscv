@@ -770,29 +770,35 @@ kpriority_fork(int priority)
   struct proc *np;
   struct proc *p = myproc();
 
+  // Validate range: 0 <= priority <= 19
   if (priority < 0 || priority > 19) {
     return -1;
   }
 
-  // Allocate process
+  // Allocate process (allocproc initializes num_epoch_slots to 0)
   if((np = allocproc()) == 0){
     return -1;
   }
 
-  // CRITICAL: Explicitly assign the requested priority passed from user space!
+  // Set custom priority
   np->priority = priority;
   np->num_epoch_slots = 0;
 
-  // Copy memory and registers
+  // Copy user memory
   if(uvmcopy(p->pagetable, np->pagetable, np->sz) < 0){
     freeproc(np);
     release(&np->lock);
     return -1;
   }
   np->sz = p->sz;
+
+  // Copy registers
   *(np->trapframe) = *(p->trapframe);
+
+  // Cause fork to return 0 in child
   np->trapframe->a0 = 0;
 
+  // Duplicate open files
   for(i = 0; i < NOFILE; i++)
     if(p->ofile[i])
       np->ofile[i] = filedup(p->ofile[i]);
