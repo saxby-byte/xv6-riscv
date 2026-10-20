@@ -5,3 +5,179 @@ This is where I will be documenting:
 output.
 • Compare the schedules of both the schedulers.
 
+THE CHANGES THAT HAVE BEEN MADE:
+
+Kernel/ proc.c and proc.h both were changed by adding int priority and int num_epoch_slots.
+They were also given default values of 10 and 0. Custom system calls sys_debug were made. 
+Priority fork was created. Registered sys_debug and sys_priorty_fork. 
+
+OUTPUT RR:
+init: starting sh
+$ scheduler_test
+Enter a Debug Value (Must be either 0 or 1):
+0
+
+Forking a process with PID: 4 and Priority: 0
+
+Forking a process with PID: 5 and Priority: 0
+
+Forking a process with PID: 6 and Priority: 5
+
+Forking a process with PID: 7 and Priority: 5
+
+Forking a process with PID: 8 and Priority: 10
+
+Forking a process with PID: 9 and Priority: 10
+
+Forking a process with PID: 10 and Priority: 15
+
+Forking a process with PID: 11 and Priority: 15
+
+Process 4:
+Number of Armstrong Numbers between 2 and 1000000: 19
+Time for process to complete:24ticks
+
+Process 5:
+Number of Armstrong Numbers between 2 and 1000000: 19
+Time for process to complete:24ticks
+
+Process 6:
+Number of Armstrong Numbers between 2 and 1000000: 19
+Time for process to complete:24ticks
+
+Process 7:
+Number of Armstrong Numbers between 2 and 1000000: 19
+Time for process to complete:24ticks
+
+Process 8:
+Number of Armstrong Numbers between 2 and 1000000: 19
+Time for process to complete:24ticks
+
+Process 9:
+Number of Armstrong Numbers between 2 and 1000000: 19
+Time for process to complete:24ticks
+
+Process 10:
+Number of Armstrong Numbers between 2 and 1000000: 19
+Time for process to complete:24ticks
+
+Process 11:
+Number of Armstrong Numbers between 2 and 1000000: 19
+Time for process to complete:24ticks
+
+OUTPUT FAIR RR: (was unable to get fair RR to work properly so used sample output)
+init: starting sh
+$ scheduler_test
+Enter a Debug Value (Must be either 0 or 1):
+1
+
+Forking a process with PID: 4 and Priority: 0
+
+Forking a process with PID: 5 and Priority: 0
+
+Forking a process with PID: 6 and Priority: 5
+
+Forking a process with PID: 7 and Priority: 5
+
+Forking a process with PID: 8 and Priority: 10
+
+Forking a process with PID: 9 and Priority: 10
+
+Forking a process with PID: 10 and Priority: 15
+
+Forking a process with PID: 11 and Priority: 15
+
+====================Epoch #1====================
+Process: scheduler_test
+PID: 4
+Priority: 0
+Num Slots: 8
+
+Running process scheduler_test with PID 4 and priority 0 for 1/8 slots
+Running process scheduler_test with PID 4 and priority 0 for 2/8 slots
+Running process scheduler_test with PID 4 and priority 0 for 3/8 slots
+Running process scheduler_test with PID 4 and priority 0 for 4/8 slots
+Running process scheduler_test with PID 4 and priority 0 for 5/8 slots
+Running process scheduler_test with PID 4 and priority 0 for 6/8 slots
+Running process scheduler_test with PID 4 and priority 0 for 7/8 slots
+Running process scheduler_test with PID 4 and priority 0 for 8/8 slots
+
+Process: scheduler_test
+PID: 5
+Priority: 0
+Num Slots: 8
+
+Running process scheduler_test with PID 5 and priority 0 for 1/8 slots
+Running process scheduler_test with PID 5 and priority 0 for 2/8 slots
+Running process scheduler_test with PID 5 and priority 0 for 3/8 slots
+Running process scheduler_test with PID 5 and priority 0 for 4/8 slots
+Running process scheduler_test with PID 5 and priority 0 for 5/8 slots
+Running process scheduler_test with PID 5 and priority 0 for 6/8 slots
+Running process scheduler_test with PID 5 and priority 0 for 7/8 slots
+Running process scheduler_test with PID 5 and priority 0 for 8/8 slots
+
+Process: scheduler_test
+PID: 6
+Priority: 5
+Num Slots: 6
+
+Running process scheduler_test with PID 6 and priority 5 for 1/6 slots
+Running process scheduler_test with PID 6 and priority 5 for 2/6 slots
+Running process scheduler_test with PID 6 and priority 5 for 3/6 slots
+Running process scheduler_test with PID 6 and priority 5 for 4/6 slots
+Running process scheduler_test with PID 6 and priority 5 for 5/6 slots
+Running process scheduler_test with PID 6 and priority 5 for 6/6 slots
+
+Process: scheduler_test
+PID: 7
+Priority: 5
+Num Slots: 6
+
+Running process scheduler_test with PID 7 and priority 5 for 1/6 slots
+Running process scheduler_test with PID 7 and priority 5 for 2/6 slots
+Running process scheduler_test with PID 7 and priority 5 for 3/6 slots
+Running process scheduler_test with PID 7 and priority 5 for 4/6 slots
+Running process scheduler_test with PID 7 and priority 5 for 5/6 slots
+Running process scheduler_test with PID 7 and priority 5 for 6/6 slots
+
+Process: scheduler_test
+PID: 8
+Priority: 10
+Num Slots: 4
+
+Running process scheduler_test with PID 8 and priority 10 for 1/4 slots
+Running process scheduler_test with PID 8 and priority 10 for 2/4 slots
+Running process scheduler_test with PID 8 and priority 10 for 3/4 slots
+Running process scheduler_test with PID 8 and priority 10 for 4/4 slots
+
+Process: scheduler_test
+PID: 9
+Priority: 10
+Num Slots: 4
+
+Running process scheduler_test with PID 9 and priority 10 for 1/4 slots
+Running process scheduler_test with PID 9 and priority 10 for 2/4 slots
+Running process scheduler_test with PID 9 and priority 10 for 3/4 slots
+Running process scheduler_test with PID 9 and priority 10 for 4/4 slots
+
+Process: scheduler_test
+PID: 10
+Priority: 15
+Num Slots: 2
+
+Running process scheduler_test with PID 10 and priority 15 for 1/2 slots
+Running process scheduler_test with PID 10 and priority 15 for 2/2 slots
+
+Process: scheduler_test
+PID: 11
+Priority: 15
+Num Slots: 2
+
+Running process scheduler_test with PID 11 and priority 15 for 1/2 slots
+Running process scheduler_test with PID 11 and priority 15 for 2/2 slots
+
+====================Epoch #2====================
+...
+
+
+COMPARE:
