@@ -14,8 +14,7 @@ struct proc proc[NPROC];
 struct proc *initproc;
 
 int nextpid = 1;
-int mode = 0;
-int epoch_count = 0;
+
 struct spinlock pid_lock;
 
 extern void forkret(void);
@@ -430,6 +429,9 @@ kwait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
+int mode = 0;
+int epoch_count = 0;
+
 void
 scheduler(void)
 {
