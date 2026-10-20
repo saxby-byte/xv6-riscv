@@ -775,12 +775,8 @@ kpriority_fork(int priority)
     return -1;
   }
 
-  // Set custom priority
-  np->priority = priority;
-  np->num_epoch_slots = 0;
-
   // Copy user memory
-  if(uvmcopy(p->pagetable, np->pagetable, np->sz) < 0){
+  if(uvmcopy(p->pagetable, np->pagetable, p->sz) < 0){
     freeproc(np);
     release(&np->lock);
     return -1;
