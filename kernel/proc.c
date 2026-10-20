@@ -471,12 +471,7 @@ scheduler(void)
       for (p = proc; p < &proc[NPROC]; p++) {
         acquire(&p->lock);
         if (p->state == RUNNABLE) {
-          // Multiply first to avoid integer truncation to 0
-          int slots = (40 * (20 - p->priority)) / total_weight;
-          if (slots < 1) {
-            slots = 1; // Guarantee at least 1 slot per runnable process
-          }
-          p->num_epoch_slots = slots;
+         p->num_epoch_slots = (40 * (20 - p->priority)) / total_weight;
         }
         release(&p->lock);
       }
