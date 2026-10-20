@@ -111,17 +111,19 @@ sys_uptime(void)
   return xticks;
 }
 
+extern int mode;
+
 uint64
 sys_debug(void)
 {
-  int m;
-// Retrieve the integer argument passed to the system call
-  argint(0, &m);
-// Validate the mode parameter (must be 0 or 1)
-if (m < 0 || m > 1){
-return -1;
-}
-return 0;
+int enable;
+  argint(0, &enable);
+
+  if (enable < 0 || enable > 1)
+    return -1;
+
+  mode = enable;
+  return 0;
 }
 
 int kpriority_fork(int priority);
