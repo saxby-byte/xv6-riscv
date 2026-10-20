@@ -49,7 +49,6 @@ int main(int argc, char *argv[]) {
   printf("\n");
  
   int priorities[8] = {0, 0, 5, 5, 10, 10, 15, 15};
-  int pids[8];
   
   for (int i = 0; i < 8; i++) {
     int pid = priority_fork(priorities[i]);
@@ -73,15 +72,10 @@ int main(int argc, char *argv[]) {
 
       exit(0);
     } else {
-      pids=[i];
+  printf("Forking a process with PID: %d and Priority: %d\n\n", pid, priorities[i]);
     }
   }
-debug(debug_val);
-  if (debug_val == 1) {
-    for (int i = 0; i < 8; i++) {
-      printf("Forking a process with PID: %d and Priority: %d\n\n", pids[i], priorities[i]);
-    }
-  }
+sleep(1);
   // Wait for all 8 child processes
   for (int i = 0; i < 8; i++) {
     wait(0);
