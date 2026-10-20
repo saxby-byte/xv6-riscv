@@ -3,7 +3,7 @@
 #include "user/user.h"
 
 // Helper function to check if a number is an Armstrong number
-void compute_armstrong(int limit) {
+int compute_armstrong(int limit) {
   int count = 0;
   for (int i = 2; i <= limit; i++) {
     int temp = i;
@@ -31,21 +31,24 @@ void compute_armstrong(int limit) {
       count++;
     }
   }
+  return count;
 }
 
 int main(int argc, char *argv[]) {
+  int debug_val = 0;
   int limit = 1000000;
-  if (argc > 1) {
-    limit = atoi(argv[1]);
-    if (limit < 1000000) {
-      limit = 1000000; // Minimum limit requirement
-    }
-  }
 
+  printf("Enter a Debug Value (Must be either 0 or 1):\n");
+
+  char buf[16];
+  gets(buf, sizeof(buf));
+  debug_val = atoi(buf);
+
+  debug(debug_val);
+
+  printf("\n");
+ 
   int priorities[8] = {0, 0, 5, 5, 10, 10, 15, 15};
-
-  // Enable debug mode
-  debug(1);
 
   for (int i = 0; i < 8; i++) {
     int pid = priority_fork(priorities[i]);
@@ -54,12 +57,27 @@ int main(int argc, char *argv[]) {
       exit(1);
     } else if (pid == 0) {
       // Child process
-      compute_armstrong(limit);
+      int start_tick = uptime();
+      int current_pid = getpid();
+      
+      int total_armstrong = compute_armstrong(limit);
+      int end_tick = uptime();
+      int duration = end_tick - start_tick;
+
+      if (debug_val == 0) {
+        printf("Process %d:\n", current_pid);
+        printf("Number of Armstrong Numbers between 2 and %d: %d\n", limit, total_armstrong);
+        printf("Time for process to complete:%dticks\n\n", duration);
+      }
+
       exit(0);
+    } else {
+      // Parent prints fork status matching screenshot
+      printf("Forking a process with PID: %d and Priority: %d\n\n", pid, priorities[i]);
     }
   }
 
-  // Parent process waits for all 8 children to finish
+  // Wait for all 8 child processes
   for (int i = 0; i < 8; i++) {
     wait(0);
   }
