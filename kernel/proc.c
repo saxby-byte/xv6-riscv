@@ -460,7 +460,7 @@ scheduler(void)
       epoch_count++;
 
       if (mode == 1) {
-        printk("====================Epoch #%d====================\n", epoch_count);[cite: 13, 16, 18]
+        printk("====================Epoch #%d====================\n", epoch_count,);
       }
 
       for (p = proc; p < &proc[NPROC]; p++) {
@@ -485,7 +485,7 @@ scheduler(void)
 
         if (mode == 1) {
           printk("Process: %s\nPID: %d\nPriority: %d\nNum Slots: %d\n\n", 
-                 p->name, p->pid, p->priority, total_slots);[cite: 13, 15, 17, 18]
+                 p->name, p->pid, p->priority, total_slots);
         }
 
         while (p->state == RUNNABLE && p->num_epoch_slots > 0) {
