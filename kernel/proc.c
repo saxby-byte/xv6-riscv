@@ -429,8 +429,8 @@ kwait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
-int mode = 0;
-int epoch_count = 0;
+int mode = 0;        // 0 = run mode, 1 = debug mode
+int epoch_count = 0; // Epoch counter
 
 void
 scheduler(void)
@@ -440,11 +440,6 @@ scheduler(void)
 
   c->proc = 0;
   for (;;) {
-    // The most recent process to run may have had interrupts
-    // turned off; enable them to avoid a deadlock if all
-    // processes are waiting. Then turn them back off
-    // to avoid a possible race between an interrupt
-    // and wfi.
     intr_on();
     intr_off();
 
@@ -453,70 +448,75 @@ scheduler(void)
 
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      if (p->state == RUNNABLE) {
+      if (p->state == RUNNABLE || p->state == RUNNING) {
         total_remaining_slots += p->num_epoch_slots;
         total_weight += (20 - p->priority);
       }
       release(&p->lock);
     }
 
+    // Reset epoch if no runnable process has slots remaining
     if (total_remaining_slots == 0 && total_weight > 0) {
       epoch_count++;
-      
+
       if (mode == 1) {
-        printk("====================Epoch #%d====================\n", epoch_count);
+        printk("====================Epoch #%d====================\n", epoch_count);[cite: 13, 16, 18]
       }
 
       for (p = proc; p < &proc[NPROC]; p++) {
         acquire(&p->lock);
-        if (p->state == RUNNABLE) {
-          // num_epoch_slots_i = 40 * (20 - p_i) / sum(20 - p_i)
-          p->num_epoch_slots = (40 * (20 - p->priority)) / total_weight;
+        if (p->state == RUNNABLE || p->state == RUNNING) {
+          // Multiply FIRST before dividing to prevent integer division truncating to 0!
+          int slots = (40 * (20 - p->priority)) / total_weight;
+          if (slots < 1) slots = 1; // Ensure every runnable process gets at least 1 slot!
+          p->num_epoch_slots = slots;
         }
         release(&p->lock);
       }
     }
-    
+
     int found = 0;
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
+
       if (p->state == RUNNABLE && p->num_epoch_slots > 0) {
         int total_slots = p->num_epoch_slots;
         int current_slot = 1;
-        
-        if (mode == 1){
-          printk("Process: %s\nPID: %d\nPriority: %d\nNum Slots: %d\n\n", p->name, p->pid, p->priority, total_slots);
+
+        if (mode == 1) {
+          printk("Process: %s\nPID: %d\nPriority: %d\nNum Slots: %d\n\n", 
+                 p->name, p->pid, p->priority, total_slots);[cite: 13, 15, 17, 18]
         }
+
         while (p->state == RUNNABLE && p->num_epoch_slots > 0) {
           p->num_epoch_slots--;
 
           if (mode == 1) {
-            
             printk("Running process %s with PID %d and priority %d for %d/%d slots\n",
-                   p->name, p->pid, p->priority, current_slot, total_slots);
+                   p->name, p->pid, p->priority, current_slot, total_slots);[cite: 13, 15, 16, 17, 18]
           }
-        current_slot++;
-          
-        p->state = RUNNING;
-        c->proc = p;
-        swtch(&c->context, &p->context);
-        // Don't re-enable interrupts on release.
-        mycpu()->intena = 0;
-        // Process is done running for now.
-        // It should have changed its p->state before coming back.
-        c->proc = 0;
-        
-      }
+
+          current_slot++;
+
+          // Context switch to child process
+          p->state = RUNNING;
+          c->proc = p;
+          swtch(&c->context, &p->context);
+
+          mycpu()->intena = 0;
+          c->proc = 0;
+        }
+
         if (mode == 1) {
           printk("\n");
         }
-        
+
         found = 1;
       }
       release(&p->lock);
     }
+
     if (found == 0) {
-      // nothing to run; stop running on this core until an interrupt.
       asm volatile("wfi");
     }
   }
