@@ -460,7 +460,7 @@ scheduler(void)
       epoch_count++;
 
       if (mode == 1) {
-        printk("====================Epoch #%d====================\n", epoch_count,);
+        printk("====================Epoch #%d====================\n", epoch_count);
       }
 
       for (p = proc; p < &proc[NPROC]; p++) {
@@ -493,7 +493,7 @@ scheduler(void)
 
           if (mode == 1) {
             printk("Running process %s with PID %d and priority %d for %d/%d slots\n",
-                   p->name, p->pid, p->priority, current_slot, total_slots);[cite: 13, 15, 16, 17, 18]
+                   p->name, p->pid, p->priority, current_slot, total_slots);
           }
 
           current_slot++;
