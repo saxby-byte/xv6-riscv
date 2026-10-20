@@ -181,3 +181,6 @@ Running process scheduler_test with PID 11 and priority 15 for 2/2 slots
 
 
 COMPARE:
+when executing schedTest in run mode 0 the system executes using standard slicing.
+When executing schedTest in run moce 1 the scheduler logs epoch resset, individ. process slots and progress tracking.
+
