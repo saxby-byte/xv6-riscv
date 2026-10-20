@@ -429,8 +429,8 @@ kwait(uint64 addr)
 //  - swtch to start running that process.
 //  - eventually that process transfers control
 //    via swtch back to the scheduler.
-int mode = 0;        // 0 = run mode, 1 = debug mode
-int epoch_count = 0; // Epoch counter
+int mode = 0;        // 0 = run, 1 = debug
+int epoch_count = 0; // Global epoch tracker
 
 void
 scheduler(void)
@@ -443,38 +443,48 @@ scheduler(void)
     intr_on();
     intr_off();
 
+    // ---------------------------------------------------------------
+    // 1. CALCULATE REMAINING SLOTS & TOTAL WEIGHT
+    // ---------------------------------------------------------------
     int total_remaining_slots = 0;
     int total_weight = 0;
 
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
-      if (p->state == RUNNABLE || p->state == RUNNING) {
+      if (p->state == RUNNABLE) {
         total_remaining_slots += p->num_epoch_slots;
         total_weight += (20 - p->priority);
       }
       release(&p->lock);
     }
 
-    // Reset epoch if no runnable process has slots remaining
+    // ---------------------------------------------------------------
+    // 2. TRIGGER NEW EPOCH
+    // ---------------------------------------------------------------
     if (total_remaining_slots == 0 && total_weight > 0) {
       epoch_count++;
 
       if (mode == 1) {
-        printk("====================Epoch #%d====================\n", epoch_count);
+        printk("====================Epoch #%d====================\n", epoch_count); //
       }
 
       for (p = proc; p < &proc[NPROC]; p++) {
         acquire(&p->lock);
-        if (p->state == RUNNABLE || p->state == RUNNING) {
-          // Multiply FIRST before dividing to prevent integer division truncating to 0!
+        if (p->state == RUNNABLE) {
+          // Multiply first to avoid integer truncation to 0
           int slots = (40 * (20 - p->priority)) / total_weight;
-          if (slots < 1) slots = 1; // Ensure every runnable process gets at least 1 slot!
+          if (slots < 1) {
+            slots = 1; // Guarantee at least 1 slot per runnable process
+          }
           p->num_epoch_slots = slots;
         }
         release(&p->lock);
       }
     }
 
+    // ---------------------------------------------------------------
+    // 3. RUN PROCESSES FOR THEIR ALLOCATED SLOTS
+    // ---------------------------------------------------------------
     int found = 0;
     for (p = proc; p < &proc[NPROC]; p++) {
       acquire(&p->lock);
@@ -498,7 +508,7 @@ scheduler(void)
 
           current_slot++;
 
-          // Context switch to child process
+          // Switch context to process
           p->state = RUNNING;
           c->proc = p;
           swtch(&c->context, &p->context);
