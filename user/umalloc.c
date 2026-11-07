@@ -96,6 +96,19 @@ malloc(uint nbytes)
   }
 }
 
+static void
+print_hex_64(uint64 val)
+{
+  char buf[17];
+  char hex_digits[] = "0123456789ABCDEF";
+  buf[16] = '\0';
+  for(int i = 15; i >= 0; i--){
+    buf[i] = hex_digits[val & 0xF];
+    val >>= 4;
+  }
+  printf("0x%s", buf);
+}
+
 static int
 get_chunk_size(int nbytes)
 {
@@ -129,13 +142,13 @@ block_alloc(int nbytes)
 
   int idx = get_list_index(chunk_sz);
 
-  // If freelist is empty, get a new page from OS
+  // If freelist is empty, request a new page via sbrk
   if(freelists[idx] == 0){
     char *page = sbrk(PGSIZE);
     if(page == (char*)-1) return 0;
 
     int num_chunks = PGSIZE / chunk_sz;
-    // Link from top of the page down (e.g., 0xFE0 down to 0x000)
+    // Link from top of page down (0xFE0 down to 0x000)
     for(int i = 0; i < num_chunks; i++){
       struct block_node *node = (struct block_node*)(page + i * chunk_sz);
       node->next = freelists[idx];
@@ -149,8 +162,11 @@ block_alloc(int nbytes)
   uint64 addr = (uint64)alloc_node;
   uint64 page_base = addr & ~0xFFFL;
 
-  // Replaced %016p with 0x%016x to pass GCC -Werror format checks
-  printf("Allocated %d-byte chunk at 0x%016lx (page 0x%016lx)\n", chunk_sz, addr, page_base);
+  printf("Allocated %d-byte chunk at ", chunk_sz);
+  print_hex_64(addr);
+  printf(" (page ");
+  print_hex_64(page_base);
+  printf(")\n");
 
   return (void*)alloc_node;
 }
@@ -163,8 +179,11 @@ block_free(void *ap)
   uint64 addr = (uint64)ap;
   uint64 page_base = addr & ~0xFFFL;
 
-  // Replaced %016p with 0x%016x to pass GCC -Werror format checks
-  printf("Freed 32-byte chunk at 0x%016lx (page 0x%016lx)\n", addr, page_base);
+  printf("Freed 32-byte chunk at ");
+  print_hex_64(addr);
+  printf(" (page ");
+  print_hex_64(page_base);
+  printf(")\n");
 
   struct block_node *node = (struct block_node*)ap;
   int idx = get_list_index(32);
