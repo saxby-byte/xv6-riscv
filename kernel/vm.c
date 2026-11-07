@@ -489,29 +489,34 @@ ismapped(pagetable_t pagetable, uint64 va)
   return 0;
 }
 
-int count_frames(pagetable_t pagetable)
+int
+count_frames(pagetable_t pagetable)
 {
-  int count = 0;
-  for (int i = 0; i < 512; i++) {
+  int count = 1; // Count the current page table frame itself
+
+  for(int i = 0; i < 512; i++){
     pte_t pte = pagetable[i];
     if(pte & PTE_V){
-    if (pte & (PTE_R | PTE_W | PTE_X)) {
-      if(pte & PTE_U){
-        count++;
-      }
+      // Check if it's an intermediate page table node (not a leaf page)
+      if((pte & (PTE_R | PTE_W | PTE_X)) == 0){
+        uint64 child = PTE2PA(pte);
+        count += count_frames((pagetable_t)child);
       } else {
-      uint64 child = PTE2PA(pte);
-      count += count_frames((pagetable_t)child);
+        // Valid leaf page frame
+        if(pte & PTE_U){
+          count++;
+        }
       }
     }
   }
   return count;
 }
 
-// System call handler
 uint64
 sys_trackframes(void)
 {
   struct proc *p = myproc();
+  if(p->pagetable == 0)
+    return 0;
   return count_frames(p->pagetable);
 }
