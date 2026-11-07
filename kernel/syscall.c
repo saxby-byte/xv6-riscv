@@ -105,6 +105,7 @@ extern uint64 sys_close(void);
 extern uint64 sys_sync(void);
 extern uint64 sys_debug(void);
 extern uint64 sys_priority_fork(void);
+extern uint64 sys_trackframes(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -134,6 +135,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_sync]    = sys_sync,
   [SYS_debug]   = sys_debug,
   [SYS_priority_fork] = sys_priority_fork,
+  [SYS_trackframes] sys_trackframes,
   // clang-format on
 };
 
