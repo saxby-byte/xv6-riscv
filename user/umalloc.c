@@ -148,12 +148,26 @@ block_alloc(int nbytes)
 
   return (void*)alloc_node;
 }
+struct block_node *alloc_node = freelists[idx];
+  freelists[idx] = alloc_node->next;
+
+  uint64 addr = (uint64)alloc_node;
+  uint64 page_base = addr & ~0xFFFL;
+
+  printf("Allocated %d-byte chunk at 0x%016p (page 0x%016p)\n", chunk_sz, (void*)addr, (void*)page_base);
+
+  return (void*)alloc_node;
+}
 
 void
 block_free(void *ap)
 {
   if(ap == 0) return;
 
+  uint64 addr = (uint64)ap;
+  uint64 page_base = addr & ~0xFFFL;
+
+  printf("Freed 32-byte chunk at 0x%016p (page 0x%016p)\n", (void*)addr, (void*)page_base);
   // Header trick or size identification: assuming 32-byte block return
   // For standard free on segregated lists, push back to top of list
   struct block_node *node = (struct block_node*)ap;
