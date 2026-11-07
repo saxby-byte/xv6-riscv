@@ -15,9 +15,18 @@ union header {
   } s;
   Align x;
 };
+struct block_header {
+  struct block_header *next;
+};
+
+// Size classes: 16, 32, 64, 128, 256, 512, 1024, 2048
+#define MIN_CHUNK 16
+#define MAX_CHUNK 2048
+#define NUM_CLASSES 8
 
 typedef union header Header;
 
+static struct block_header *free_lists[NUM_CLASSES];
 static Header base;
 static Header *freep;
 
@@ -87,4 +96,81 @@ malloc(uint nbytes)
       if ((p = morecore(nunits)) == 0)
         return 0;
   }
+}
+
+// round up to nearest valid 2^n chunk size
+static int
+get_chunk_size(int nbytes)
+{
+  int sz = MIN_CHUNK;
+  while (sz < nbytes && sz <= MAX_CHUNK) {
+    sz <<= 1;
+  }
+  if (sz > MAX_CHUNK || PGSIZE % sz != 0) {
+    return -1; // Exceeds max supported chunk size or does not divide PGSIZE
+  }
+  return sz;
+}
+
+static int
+get_class_index(int chunk_size)
+{
+  int idx = 0;
+  int sz = MIN_CHUNK;
+  while (sz < chunk_size && idx < NUM_CLASSES - 1) {
+    sz <<= 1;
+    idx++;
+  }
+  return idx;
+}
+
+void *
+block_alloc(int nbytes)
+{
+  if (nbytes <= 0)
+    return 0;
+
+  int chunk_size = get_chunk_size(nbytes);
+  if (chunk_size < 0)
+    return 0;
+
+  int idx = get_class_index(chunk_size);
+
+  // If free list has a block available, pop and return it
+  if (free_lists[idx] != 0) {
+    struct block_header *p = free_lists[idx];
+    free_lists[idx] = p->next;
+    return (void *)p;
+  }
+
+  // allocate a new page via sbrk
+  char *page = sbrk(PGSIZE);
+  if (page == (char *)-1)
+    return 0;
+
+  // Carve the new page into chunk_size blocks
+  int num_blocks = PGSIZE / chunk_size;
+  for (int i = 0; i < num_blocks; i++) {
+    struct block_header *block = (struct block_header *)(page + i * chunk_size);
+    block->next = free_lists[idx];
+    free_lists[idx] = block;
+  }
+
+  // Pop and return one block from the newly created list
+  struct block_header *p = free_lists[idx];
+  free_lists[idx] = p->next;
+  return (void *)p;
+}
+
+void
+block_free(void *ap)
+{
+  if (ap == 0)
+    return;
+
+  // For basic segregated lists, returning block to class index 0 (16-byte list)
+  // or storing header size class allows easy return to appropriate free list.
+  struct block_header *p = (struct block_header *)ap;
+  p->next = free_lists[0];
+  free_lists[0] = p;
 }
