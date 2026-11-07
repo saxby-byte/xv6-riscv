@@ -27,6 +27,7 @@ int uptime(void);
 int sync(void);
 int debug(int mode);
 int priority_fork(int priority);
+int trackframes(void);
 
 // ulib.c
 int stat(const char *, struct stat *);
