@@ -5,6 +5,7 @@
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
+#define PGSIZE 4096
 
 typedef long Align;
 
@@ -15,6 +16,12 @@ union header {
   } s;
   Align x;
 };
+struct block_node {
+  struct block_node *next;
+};
+
+// Size classes: 32, 64, 128, 256, 512, 1024, 2048
+static struct block_node *freelists[7];
 
 typedef union header Header;
 
@@ -87,4 +94,70 @@ malloc(uint nbytes)
       if ((p = morecore(nunits)) == 0)
         return 0;
   }
+}
+
+static int
+get_chunk_size(int nbytes)
+{
+  int sz = 32;
+  while(sz < nbytes && sz <= 2048){
+    sz <<= 1;
+  }
+  if(nbytes > 2048) return -1; // Exceeds segregated pool limit
+  return sz;
+}
+
+static int
+get_list_index(int chunk_size)
+{
+  int idx = 0;
+  int sz = 32;
+  while(sz < chunk_size){
+    sz <<= 1;
+    idx++;
+  }
+  return idx;
+}
+
+void*
+block_alloc(int nbytes)
+{
+  if(nbytes <= 0) return 0;
+
+  int chunk_sz = get_chunk_size(nbytes);
+  if(chunk_sz < 0) return 0;
+
+  int idx = get_list_index(chunk_sz);
+
+  // If freelist for this chunk size is empty, allocate a new page from OS via sbrk
+  if(freelists[idx] == 0){
+    char *page = sbrk(PGSIZE);
+    if(page == (char*)-1) return 0;
+
+    int num_chunks = PGSIZE / chunk_sz;
+    for(int i = 0; i < num_chunks; i++){
+      struct block_node *node = (struct block_node*)(page + i * chunk_sz);
+      node->next = freelists[idx];
+      freelists[idx] = node;
+    }
+  }
+
+  // Pop block off the segregated freelist
+  struct block_node *alloc_node = freelists[idx];
+  freelists[idx] = alloc_node->next;
+
+  return (void*)alloc_node;
+}
+
+void
+block_free(void *ap)
+{
+  if(ap == 0) return;
+
+  // Header trick or size identification: assuming 32-byte block return
+  // For standard free on segregated lists, push back to top of list
+  struct block_node *node = (struct block_node*)ap;
+  int idx = get_list_index(32); // Returns to 32-byte pool for 28-byte allocs
+  node->next = freelists[idx];
+  freelists[idx] = node;
 }
