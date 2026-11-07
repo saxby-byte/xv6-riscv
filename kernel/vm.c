@@ -503,7 +503,7 @@ count_frames(pagetable_t pagetable)
         count += count_frames((pagetable_t)child);
       } else {
         // Valid leaf page frame
-        if(PTE_U){
+        if(pte){
           count++;
        }
       }
