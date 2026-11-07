@@ -489,3 +489,32 @@ ismapped(pagetable_t pagetable, uint64 va)
   }
   return 0;
 }
+
+uint64
+count_frames(pagetable_t pagetable)
+{
+  uint64 count = 0;
+  for (int i = 0; i < 512; i++) {
+    pte_t pte = pagetable[i];
+    if (pte & PTE_V) {
+      if ((pte & (PTE_R | PTE_W | PTE_X)) == 0) {
+        // page table directory
+        uint64 child = PTE2PA(pte);
+        count += count_frames((pagetable_t)child);
+      } else {
+        count++;
+      }
+    }
+  }
+  return count;
+}
+
+// System call handler
+uint64
+sys_trackframes(void)
+{
+  struct proc *p = myproc();
+  if (p->pagetable == 0)
+    return 0;
+  return count_frames(p->pagetable);
+}
