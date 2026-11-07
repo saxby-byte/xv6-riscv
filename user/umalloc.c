@@ -150,7 +150,7 @@ block_alloc(int nbytes)
   uint64 page_base = addr & ~0xFFFL;
 
   // Replaced %016p with 0x%016x to pass GCC -Werror format checks
-  printf("Allocated %d-byte chunk at 0x%016x (page 0x%016x)\n", chunk_sz, addr, page_base);
+  printf("Allocated %d-byte chunk at 0x%016lx (page 0x%016lx)\n", chunk_sz, addr, page_base);
 
   return (void*)alloc_node;
 }
@@ -164,7 +164,7 @@ block_free(void *ap)
   uint64 page_base = addr & ~0xFFFL;
 
   // Replaced %016p with 0x%016x to pass GCC -Werror format checks
-  printf("Freed 32-byte chunk at 0x%016x (page 0x%016x)\n", addr, page_base);
+  printf("Freed 32-byte chunk at 0x%016lx (page 0x%016lx)\n", addr, page_base);
 
   struct block_node *node = (struct block_node*)ap;
   int idx = get_list_index(32);
