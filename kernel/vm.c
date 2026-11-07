@@ -494,7 +494,7 @@ int count_frames(pagetable_t pagetable)
   int count = 0;
   for (int i = 0; i < 512; i++) {
     pte_t pte = pagetable[i];
-    if ((pte & PTE_V) && (PTE_R | PTE_W | PTE_X)) == 0) {
+    if ((pte & PTE_V) && (PTE_R | PTE_W | PTE_X) == 0) {
         // page table directory
         uint64 child = PTE2PA(pte);
         count += count_frames((pagetable_t)child);
