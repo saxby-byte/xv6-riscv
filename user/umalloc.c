@@ -103,7 +103,7 @@ get_chunk_size(int nbytes)
   while(sz < nbytes && sz <= 2048){
     sz <<= 1;
   }
-  if(nbytes > 2048) return -1; // Exceeds segregated pool limit
+  if(nbytes > 2048) return -1;
   return sz;
 }
 
@@ -129,12 +129,13 @@ block_alloc(int nbytes)
 
   int idx = get_list_index(chunk_sz);
 
-  // If freelist for this chunk size is empty, allocate a new page from OS via sbrk
+  // If freelist is empty, get a new page from OS
   if(freelists[idx] == 0){
     char *page = sbrk(PGSIZE);
     if(page == (char*)-1) return 0;
 
     int num_chunks = PGSIZE / chunk_sz;
+    // Link from top of the page down (e.g., 0xFE0 down to 0x000)
     for(int i = 0; i < num_chunks; i++){
       struct block_node *node = (struct block_node*)(page + i * chunk_sz);
       node->next = freelists[idx];
@@ -142,19 +143,14 @@ block_alloc(int nbytes)
     }
   }
 
-  // Pop block off the segregated freelist
   struct block_node *alloc_node = freelists[idx];
-  freelists[idx] = alloc_node->next;
-
-  return (void*)alloc_node;
-}
-struct block_node *alloc_node = freelists[idx];
   freelists[idx] = alloc_node->next;
 
   uint64 addr = (uint64)alloc_node;
   uint64 page_base = addr & ~0xFFFL;
 
-  printf("Allocated %d-byte chunk at 0x%016p (page 0x%016p)\n", chunk_sz, (void*)addr, (void*)page_base);
+  // Replaced %016p with 0x%016x to pass GCC -Werror format checks
+  printf("Allocated %d-byte chunk at 0x%016x (page 0x%016x)\n", chunk_sz, addr, page_base);
 
   return (void*)alloc_node;
 }
@@ -167,11 +163,11 @@ block_free(void *ap)
   uint64 addr = (uint64)ap;
   uint64 page_base = addr & ~0xFFFL;
 
-  printf("Freed 32-byte chunk at 0x%016p (page 0x%016p)\n", (void*)addr, (void*)page_base);
-  // Header trick or size identification: assuming 32-byte block return
-  // For standard free on segregated lists, push back to top of list
+  // Replaced %016p with 0x%016x to pass GCC -Werror format checks
+  printf("Freed 32-byte chunk at 0x%016x (page 0x%016x)\n", addr, page_base);
+
   struct block_node *node = (struct block_node*)ap;
-  int idx = get_list_index(32); // Returns to 32-byte pool for 28-byte allocs
+  int idx = get_list_index(32);
   node->next = freelists[idx];
   freelists[idx] = node;
 }
