@@ -503,7 +503,7 @@ count_frames(pagetable_t pagetable)
         count += count_frames((pagetable_t)child);
       } else {
         // Valid leaf page frame
-        if(pte){
+        if((pte & PTE_U) || (PTE2PA(pte) != (uint64)trampoline)){
           count++;
        }
       }
