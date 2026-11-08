@@ -88,3 +88,98 @@ malloc(uint nbytes)
         return 0;
   }
 }
+
+static void
+print_hex_64(uint64 val)
+{
+  char buf[17];
+  char hex_digits[] = "0123456789ABCDEF";
+  buf[16] = '\0';
+  for(int i = 15; i >= 0; i--){
+    buf[i] = hex_digits[val & 0xF];
+    val >>= 4;
+  }
+  printf("0x%s", buf);
+}
+
+static int
+get_chunk_size(int nbytes)
+{
+  int sz = 32;
+  while(sz < nbytes && sz <= 2048){
+    sz <<= 1;
+  }
+  if(nbytes > 2048) return -1;
+  return sz;
+}
+
+static int
+get_list_index(int chunk_size)
+{
+  int idx = 0;
+  int sz = 32;
+  while(sz < chunk_size){
+    sz <<= 1;
+    idx++;
+  }
+  return idx;
+}
+
+void*
+block_alloc(int nbytes)
+{
+  if(nbytes <= 0) return 0;
+
+  int chunk_sz = get_chunk_size(nbytes);
+  if(chunk_sz < 0) return 0;
+
+  int idx = get_list_index(chunk_sz);
+
+  // If freelist is empty, request a new page via sbrk
+  if(freelists[idx] == 0){
+    char *page = sbrk(PGSIZE);
+    if(page == (char*)-1) return 0;
+
+    int num_chunks = PGSIZE / chunk_sz;
+    // Link from top of page down (0xFE0 down to 0x000)
+    for(int i = 0; i < num_chunks; i++){
+      struct block_node *node = (struct block_node*)(page + i * chunk_sz);
+      node->next = freelists[idx];
+      freelists[idx] = node;
+    }
+  }
+
+  struct block_node *alloc_node = freelists[idx];
+  freelists[idx] = alloc_node->next;
+
+  uint64 addr = (uint64)alloc_node;
+  uint64 page_base = addr & ~0xFFFL;
+
+  printf("Allocated %d-byte chunk at ", chunk_sz);
+  print_hex_64(addr);
+  printf(" (page ");
+  print_hex_64(page_base);
+  printf(")\n");
+
+  return (void*)alloc_node;
+}
+
+void
+block_free(void *ap)
+{
+  if(ap == 0) return;
+
+  uint64 addr = (uint64)ap;
+  uint64 page_base = addr & ~0xFFFL;
+
+  printf("Freed 32-byte chunk at ");
+  print_hex_64(addr);
+  printf(" (page ");
+  print_hex_64(page_base);
+  printf(")\n");
+
+  struct block_node *node = (struct block_node*)ap;
+  int idx = get_list_index(32);
+  node->next = freelists[idx];
+  freelists[idx] = node;
+}
