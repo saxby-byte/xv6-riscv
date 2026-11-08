@@ -105,6 +105,7 @@ extern uint64 sys_mkdir(void);
 extern uint64 sys_close(void);
 extern uint64 sys_sync(void);
 extern uint64 sys_syscalltrace(void);
+extern uint64 sys_trackframes(void);
 
 // An array mapping syscall numbers from syscall.h
 // to the function that handles the system call.
@@ -133,6 +134,7 @@ static uint64 (*syscalls[])(void) = {
   [SYS_close]        = sys_close,
   [SYS_sync]         = sys_sync,
   [SYS_syscalltrace] = sys_syscalltrace,
+  [SYS_trackframes] sys_trackframes
   // clang-format on
 };
 
