@@ -5,6 +5,7 @@
 
 // Memory allocator by Kernighan and Ritchie,
 // The C programming Language, 2nd ed.  Section 8.7.
+#define PGSIZE 4096
 
 typedef long Align;
 
@@ -15,6 +16,12 @@ union header {
   } s;
   Align x;
 };
+struct block_node {
+  struct block_node *next;
+};
+
+// Size classes: 32, 64, 128, 256, 512, 1024, 2048
+static struct block_node *freelists[7];
 
 typedef union header Header;
 
